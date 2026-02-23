@@ -1,101 +1,112 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Home, Plane, Heart, Car, Target, Plus } from 'lucide-react';
+
+export default function CaptureMeta() {
+  const router = useRouter();
+  const [selectedMeta, setSelectedMeta] = useState<string | null>(null);
+  const [customMeta, setCustomMeta] = useState('');
+  const [isTypingCustom, setIsTypingCustom] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  const predefinedMetas = [
+    { id: 'Casa Própria', label: 'Casa Própria / Reforma', icon: Home },
+    { id: 'Viagem Internacional', label: 'Viagem Internacional', icon: Plane },
+    { id: 'Casamento', label: 'Casamento / Festa', icon: Heart },
+    { id: 'Troca de Carro', label: 'Troca de Carro', icon: Car },
+    { id: 'Liberdade Financeira', label: 'Reserva & Liberdade', icon: Target },
+  ];
+
+  const handleProceed = () => {
+    const finalMeta = isTypingCustom && customMeta.trim() ? customMeta.trim() : selectedMeta;
+    if (!finalMeta) return;
+    setIsNavigating(true);
+    setTimeout(() => {
+      router.push(`/chamada-recebida?meta=${encodeURIComponent(finalMeta)}`);
+    }, 500);
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <main className={`min-h-[100dvh] w-full bg-[#0A0514] flex flex-col items-center justify-center text-white px-6 font-outfit relative overflow-hidden transition-opacity duration-500 ${isNavigating ? 'opacity-0' : 'opacity-100'}`}>
+      {/* Background glow effects */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-[#C13C7A] rounded-full blur-[120px] opacity-20 pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] bg-[#E6C26E] rounded-full blur-[120px] opacity-15 pointer-events-none"></div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      <div className="z-10 w-full max-w-[400px] flex flex-col items-center animate-in fade-in duration-700">
+        <h1 className="text-[28px] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 text-center mb-2 leading-tight">
+          Toda estrutura começa com um destino comum.
+        </h1>
+        <p className="text-[#A0A0A0] text-center mb-10 font-dmsans text-[17px]">
+          Qual é a principal meta de vocês hoje?
+        </p>
+
+        <div className="w-full space-y-3 mb-10">
+          {predefinedMetas.map((meta) => {
+            const Icon = meta.icon;
+            const isSelected = selectedMeta === meta.id && !isTypingCustom;
+            return (
+              <button
+                key={meta.id}
+                onClick={() => { setSelectedMeta(meta.id); setIsTypingCustom(false); }}
+                className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 backdrop-blur-md ${isSelected
+                  ? 'bg-white/10 border-[#E6C26E]/50 shadow-[0_0_15px_rgba(230,194,110,0.15)] ring-1 ring-[#E6C26E]'
+                  : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
+                  }`}
+              >
+                <div className={`p-3 rounded-xl transition-colors ${isSelected ? 'bg-[#E6C26E]/20 text-[#E6C26E]' : 'bg-white/5 text-white/70'}`}>
+                  <Icon size={24} strokeWidth={1.5} />
+                </div>
+                <span className={`text-[17px] font-medium ${isSelected ? 'text-white' : 'text-white/80'}`}>
+                  {meta.label}
+                </span>
+              </button>
+            )
+          })}
+
+          {/* Outro field */}
+          <div
+            className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 backdrop-blur-md ${isTypingCustom
+              ? 'bg-white/10 border-[#C13C7A]/50 shadow-[0_0_15px_rgba(193,60,122,0.15)] ring-1 ring-[#C13C7A]'
+              : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 cursor-pointer'
+              }`}
+            onClick={() => { setIsTypingCustom(true); setSelectedMeta(null); }}
           >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <div className={`p-3 rounded-xl transition-colors ${isTypingCustom ? 'bg-[#C13C7A]/20 text-[#C13C7A]' : 'bg-white/5 text-white/70'}`}>
+              <Plus size={24} strokeWidth={1.5} />
+            </div>
+            {isTypingCustom ? (
+              <input
+                autoFocus
+                type="text"
+                placeholder="Digite sua meta..."
+                className="bg-transparent border-none outline-none text-white text-[17px] w-full font-medium placeholder-white/40 font-dmsans"
+                value={customMeta}
+                onChange={(e) => setCustomMeta(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleProceed();
+                }}
+              />
+            ) : (
+              <span className="text-[17px] font-medium text-white/80">Outra meta...</span>
+            )}
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+
+        <button
+          onClick={handleProceed}
+          disabled={!selectedMeta && (!isTypingCustom || customMeta.trim() === '')}
+          className={`w-full min-h-[60px] rounded-2xl font-bold text-[18px] transition-all duration-500 flex items-center justify-center
+            ${(selectedMeta || (isTypingCustom && customMeta.trim().length > 0))
+              ? 'bg-gradient-to-r from-[#C13C7A] to-[#9D2B5E] text-white shadow-[0_0_20px_rgba(193,60,122,0.3)] hover:scale-[1.02] active:scale-[0.98]'
+              : 'bg-white/5 text-white/30 cursor-not-allowed border border-white/5'
+            }
+          `}
         >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          Visualizar nosso futuro
+        </button>
+      </div>
+    </main>
   );
 }
