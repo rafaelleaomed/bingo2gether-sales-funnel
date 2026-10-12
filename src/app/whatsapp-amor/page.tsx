@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ChevronLeft, Phone, Video, MoreVertical, Paperclip, Mic, Check, CheckCheck, Users } from 'lucide-react';
+import { ChevronLeft, Phone, Video, MoreVertical, Paperclip, Mic, Check, CheckCheck } from 'lucide-react';
 import Image from 'next/image';
 
 interface Message {
@@ -23,8 +23,6 @@ function WhatsAppAmorContent() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [isTyping, setIsTyping] = useState(false);
     const [showOptions, setShowOptions] = useState(false);
-    const [selectedOption, setSelectedOption] = useState<number | null>(null);
-    const [showFinalTransition, setShowFinalTransition] = useState(false);
     const [isExiting, setIsExiting] = useState(false);
 
     const chatRef = useRef<HTMLDivElement>(null);
@@ -49,7 +47,7 @@ function WhatsAppAmorContent() {
                 behavior: 'smooth'
             });
         }
-    }, [messages, isTyping, showOptions, showFinalTransition]);
+    }, [messages, isTyping, showOptions]);
 
     const getCurrentTime = () => {
         const now = new Date();
@@ -102,7 +100,6 @@ function WhatsAppAmorContent() {
     }, []);
 
     const handleOptionClick = async (optionIndex: number, optionText: string) => {
-        setSelectedOption(optionIndex);
         setShowOptions(false);
 
         // Add lead response
@@ -219,14 +216,7 @@ function WhatsAppAmorContent() {
 
                 </div>
 
-                {/* Final Transition Overlay */}
-                {showFinalTransition && (
-                    <div className="absolute inset-0 bg-black/80 z-20 flex items-center justify-center p-6 animate-in fade-in duration-1000 backdrop-blur-sm">
-                        <h2 className="text-white text-[28px] font-semibold text-center leading-tight tracking-tight shadow-xl">
-                            "Improviso recorrente cria tensão silenciosa."
-                        </h2>
-                    </div>
-                )}
+                {/* Final Transition Overlay removido pois a var showFinalTransition estava sem uso, o modal não é ativado aqui e sim o redirecionamento */}
 
                 {/* Input Block Fixo */}
                 <div className="absolute bottom-0 w-full bg-[#F0F0F0] min-h-[60px] pb-[env(safe-area-inset-bottom,16px)] shrink-0 flex items-end px-2 py-2 gap-2 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-10">

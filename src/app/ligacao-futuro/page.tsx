@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { MicOff, Grid3X3, Volume2, Plus, Video, Users, Phone } from 'lucide-react';
 
@@ -13,11 +13,20 @@ export default function LigacaoFuturo() {
     const [callDuration, setCallDuration] = useState(0);
     const [showQuestion, setShowQuestion] = useState(false);
     const [isTransitioning, setIsTransitioning] = useState(false);
+    const [audioBlocked, setAudioBlocked] = useState(false);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
 
     useEffect(() => {
         const timer = setInterval(() => {
             setCallDuration((prev) => prev + 1);
         }, 1000);
+
+        if (audioRef.current) {
+            audioRef.current.play().catch(err => {
+                console.log("Autoplay blocked:", err);
+                setAudioBlocked(true);
+            });
+        }
 
         return () => {
             clearInterval(timer);
@@ -37,7 +46,7 @@ export default function LigacaoFuturo() {
         }, 600);
     };
 
-    const ActionButton = ({ icon: Icon, label }: { icon: any, label: string }) => (
+    const ActionButton = ({ icon: Icon, label }: { icon: React.ElementType, label: string }) => (
         <div className="flex flex-col items-center gap-2">
             <button className="w-[64px] h-[64px] rounded-full bg-[#48484A] flex items-center justify-center transition-all duration-200 active:scale-95 min-h-[44px] min-w-[44px] focus:ring-2 focus:ring-white">
                 <Icon size={28} color="#FFFFFF" />
@@ -46,8 +55,26 @@ export default function LigacaoFuturo() {
         </div>
     );
 
+    const handlePlayAudio = () => {
+        if (audioRef.current && audioBlocked) {
+            const playPromise = audioRef.current.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    setAudioBlocked(false);
+                }).catch(err => console.log("Still blocked:", err));
+            }
+        }
+    };
+
     return (
-        <main className={`min-h-screen bg-black w-full overflow-x-hidden flex justify-center transition-opacity duration-700 font-ios select-none ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
+        <main onClick={handlePlayAudio} className={`min-h-screen bg-black w-full overflow-x-hidden flex justify-center transition-opacity duration-700 font-ios select-none ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
+            {audioBlocked && (
+                <div className="absolute top-16 left-0 w-full z-50 flex justify-center animate-bounce pointer-events-none">
+                    <div className="bg-white/20 backdrop-blur-md px-6 py-3 rounded-full text-white text-[15px] font-medium shadow-lg border border-white/10 flex items-center gap-2">
+                        <Volume2 size={18} /> Toque na tela para ativar o áudio
+                    </div>
+                </div>
+            )}
             <div className="w-full h-screen max-w-[100vw] lg:max-w-[400px] lg:mx-auto lg:rounded-[40px] lg:h-[90vh] lg:my-[5vh] lg:overflow-hidden relative bg-gradient-to-b from-[#1C1C1E] to-[#000000] flex flex-col pt-[env(safe-area-inset-top,44px)] animate-in fade-in duration-500">
 
                 <div className="h-[44px] shrink-0" />
@@ -95,6 +122,7 @@ export default function LigacaoFuturo() {
 
                     {/* ElevenLabs Audio Player */}
                     <audio
+                        ref={audioRef}
                         src="/audio-futuro.mp3"
                         autoPlay
                         onEnded={() => setShowQuestion(true)}

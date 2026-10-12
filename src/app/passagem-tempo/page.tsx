@@ -35,7 +35,7 @@ export default function PassagemTempo() {
         <main className={`min-h-[100dvh] bg-black w-full flex items-center justify-center font-ios transition-opacity duration-1000 ${isExiting ? 'opacity-0' : 'opacity-100'}`}>
             <div className={`w-full max-w-[480px] mx-auto p-8 flex items-center justify-center text-center transition-opacity duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
                 <h1 className="text-white text-2xl md:text-3xl font-light tracking-wide italic">
-                    "Alguns meses depois..."
+                    &quot;Alguns meses depois...&quot;
                 </h1>
             </div>
         </main>

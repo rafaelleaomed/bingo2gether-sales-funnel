@@ -14,14 +14,18 @@ export default function Tracking() {
     useEffect(() => {
         // Dispara PageView toda vez que a rota muda no Next.js App Router
         if (pathname) {
-            if (GA_MEASUREMENT_ID && typeof window !== 'undefined' && (window as any).gtag) {
-                (window as any).gtag('config', GA_MEASUREMENT_ID, {
+            const win = window as unknown as {
+                gtag?: (...args: unknown[]) => void;
+                fbq?: (...args: unknown[]) => void;
+            };
+            if (GA_MEASUREMENT_ID && typeof window !== 'undefined' && win.gtag) {
+                win.gtag('config', GA_MEASUREMENT_ID, {
                     page_path: pathname,
                 })
             }
 
-            if (META_PIXEL_ID && typeof window !== 'undefined' && (window as any).fbq) {
-                (window as any).fbq('track', 'PageView')
+            if (META_PIXEL_ID && typeof window !== 'undefined' && win.fbq) {
+                win.fbq('track', 'PageView')
             }
         }
     }, [pathname, searchParams])

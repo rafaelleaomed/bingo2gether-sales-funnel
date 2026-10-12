@@ -3,7 +3,6 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Battery, Wifi, Signal } from 'lucide-react';
-import Image from 'next/image';
 
 function NotificacaoContent() {
     const router = useRouter();
@@ -28,7 +27,7 @@ function NotificacaoContent() {
         const pushTimer = setTimeout(() => {
             setShowPush(true);
             if (typeof window !== 'undefined' && 'vibrate' in navigator) {
-                try { navigator.vibrate([200, 100, 200]); } catch (e) { }
+                try { navigator.vibrate([200, 100, 200]); } catch { }
             }
         }, 2500);
 

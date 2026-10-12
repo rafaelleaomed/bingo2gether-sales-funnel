@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Check, X, ChevronDown, Lock, Shield, Sparkles, Plane, Home, Target, ArrowRight } from 'lucide-react';
+import { Check, X, ChevronDown, Lock, Shield, Sparkles, Plane, Home, Target, ArrowRight, Mail } from 'lucide-react';
 
 export default function SalesPage() {
-    const router = useRouter();
     const [openFaq, setOpenFaq] = useState<number | null>(null);
     const [selectedPlan, setSelectedPlan] = useState<'anual' | 'mensal' | 'vitalicio'>('anual');
+    const [showEmailForm, setShowEmailForm] = useState(false);
+    const [email, setEmail] = useState('');
+    const [emailStatus, setEmailStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
     const faqs = [
         { q: "Já tentei planilha e não deu certo. Por que isso funcionaria?", a: "Planilhas não engajam porque não mostram progresso visual nem são gamificadas. O Bingo2Gether transforma a meta num jogo on-line compartilhado, onde cada número carimbado vira uma vitória." },
@@ -38,10 +39,10 @@ export default function SalesPage() {
                         <Sparkles size={14} className="animate-pulse" /> Solução para Casais
                     </div>
                     <h1 className="text-[40px] sm:text-[46px] font-outfit font-bold leading-[1.05] mb-6 tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70 drop-shadow-sm">
-                        A constância que falta nas finanças de vocês.
+                        Juntem dinheiro jogando bingo — a dois.
                     </h1>
                     <p className="text-[17px] text-white/70 leading-relaxed mb-10 max-w-[340px] mx-auto">
-                        O método gamificado que acaba com o improviso invisível e transforma metas chatas de dividir num jogo on-line a dois.
+                        O app que transforma a economia do casal em um jogo viciante. Sem planilhas, sem brigas. Sorteiem números, batam a meta e comemorem.
                     </p>
 
                     <button
@@ -89,7 +90,7 @@ export default function SalesPage() {
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[100px] bg-brand-gold/10 blur-[80px]" />
                     <h2 className="text-[32px] font-outfit font-bold mb-6 text-brand-gold relative z-10 drop-shadow-md">Improviso gera atrito.</h2>
                     <p className="text-[18px] text-white/80 leading-relaxed max-w-[340px] mx-auto relative z-10">
-                        Vocês não precisam "juntar o que sobra". Precisa-se de um taboeiro justo, que recompense cada esforço <strong>sem castigar no orçamento de quem recebe menos</strong>.
+                        Vocês não precisam &quot;juntar o que sobra&quot;. Precisa-se de um taboeiro justo, que recompense cada esforço <strong>sem castigar no orçamento de quem recebe menos</strong>.
                     </p>
                 </section>
 
@@ -175,7 +176,7 @@ export default function SalesPage() {
                                 <Plane className="text-blue-400" size={24} />
                             </div>
                             <h3 className="font-outfit font-bold text-[22px] mb-2">Viagens Inesquecíveis</h3>
-                            <p className="text-white/60 text-[15px] leading-relaxed mb-4">Diga adeus ao "vamos ver". Preencha a cartela e garantam a passagem sem recorrer a 12x no cartão.</p>
+                            <p className="text-white/60 text-[15px] leading-relaxed mb-4">Diga adeus ao &quot;vamos ver&quot;. Preencha a cartela e garantam a passagem sem recorrer a 12x no cartão.</p>
                             <div className="text-blue-400 font-bold tracking-wide text-sm">Destino Pago →</div>
                         </div>
                     </div>
@@ -305,20 +306,113 @@ export default function SalesPage() {
                     <div className="mt-6">
                         <a
                             href={
-                                selectedPlan === 'anual' ? 'https://buy.stripe.com/bJe9AS6WV4lE12AfaO0Fi01' :
-                                    selectedPlan === 'vitalicio' ? 'https://buy.stripe.com/14A28q3KJg4maDafaO0Fi02' :
-                                        'https://buy.stripe.com/aFaeVc3KJf0ih1ygeS0Fi00'
+                                selectedPlan === 'anual' ? 'https://buy.stripe.com/3cIcN41CBcSa7qY2o20Fi0a' :
+                                    selectedPlan === 'vitalicio' ? 'https://buy.stripe.com/cNibJ0a97dWe6mUgeS0Fi0b' :
+                                        'https://buy.stripe.com/fZuaEWdljf0ih1y5Ae0Fi09'
+                                // Configuração de retorno no Stripe: redirecionar para https://bingo2gether-funnel.vercel.app/obrigado?plan=...
                             }
+                            onClick={() => {
+                                if (typeof window !== 'undefined') {
+                                    const win = window as unknown as {
+                                        fbq?: (...args: unknown[]) => void;
+                                        gtag?: (...args: unknown[]) => void;
+                                    };
+                                    const value = selectedPlan === 'anual' ? 199.90 : selectedPlan === 'vitalicio' ? 399.90 : 29.90;
+
+                                    if (win.fbq) {
+                                        win.fbq('track', 'InitiateCheckout', {
+                                            content_name: `Plano ${selectedPlan.toUpperCase()}`,
+                                            currency: 'BRL',
+                                            value: value
+                                        });
+                                    }
+                                    if (win.gtag) {
+                                        win.gtag('event', 'begin_checkout', {
+                                            currency: 'BRL',
+                                            value: value,
+                                            items: [{
+                                                item_name: `Plano ${selectedPlan.toUpperCase()}`,
+                                                price: value,
+                                                currency: 'BRL'
+                                            }]
+                                        });
+                                    }
+                                }
+                            }}
                             className="w-full bg-gradient-to-r from-brand-gold to-yellow-600 text-[#2A1604] font-extrabold min-h-[64px] rounded-2xl flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all shadow-[0_10px_30px_rgba(230,194,110,0.3)] text-[18px]"
                         >
                             <Lock size={18} /> {selectedPlan === 'anual' ? 'Assinar Anual Agora' : selectedPlan === 'vitalicio' ? 'Garantir Acesso Vitalício' : 'Assinar Mensal'}
                         </a>
-                        <a
-                            href="https://bingotogether.lovable.app"
-                            className="w-full mt-4 text-[14px] text-white/50 hover:text-white transition-colors underline underline-offset-4 decoration-white/20 pb-4 inline-block text-center"
-                        >
-                            Começar gratuitamente agora
-                        </a>
+                        {!showEmailForm ? (
+                            <button
+                                onClick={() => setShowEmailForm(true)}
+                                className="w-full mt-4 text-[14px] text-white/50 hover:text-white transition-colors underline underline-offset-4 decoration-white/20 pb-4 inline-block text-center"
+                            >
+                                Começar gratuitamente agora
+                            </button>
+                        ) : (
+                            <div className="mt-4 w-full animate-in fade-in slide-in-from-bottom-4 duration-300">
+                                {emailStatus === 'success' ? (
+                                    <div className="flex flex-col items-center gap-2 py-4">
+                                        <Check size={32} className="text-green-400" />
+                                        <p className="text-green-400 font-semibold text-[15px]">Cadastrado! Redirecionando...</p>
+                                    </div>
+                                ) : (
+                                    <form
+                                        onSubmit={async (e) => {
+                                            e.preventDefault();
+                                            setEmailStatus('loading');
+                                            try {
+                                                const res = await fetch('/api/subscribe', {
+                                                    method: 'POST',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({ email }),
+                                                });
+                                                if (res.ok) {
+                                                    setEmailStatus('success');
+                                                    const win = window as unknown as {
+                                                        fbq?: (...args: unknown[]) => void;
+                                                        gtag?: (...args: unknown[]) => void;
+                                                    };
+                                                    if (win.fbq) win.fbq('trackCustom', 'FreeSignupClicked');
+                                                    if (win.gtag) win.gtag('event', 'select_item', { item_name: 'Plano Free' });
+                                                    setTimeout(() => {
+                                                        window.location.href = 'https://bingo2gether-app.vercel.app';
+                                                    }, 1500);
+                                                } else {
+                                                    setEmailStatus('error');
+                                                }
+                                            } catch {
+                                                setEmailStatus('error');
+                                            }
+                                        }}
+                                        className="flex flex-col gap-3"
+                                    >
+                                        <div className="relative">
+                                            <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" />
+                                            <input
+                                                type="email"
+                                                required
+                                                placeholder="Seu melhor e-mail"
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder:text-white/30 text-[15px] focus:outline-none focus:border-brand-gold/50 focus:ring-1 focus:ring-brand-gold/30 transition-all"
+                                            />
+                                        </div>
+                                        <button
+                                            type="submit"
+                                            disabled={emailStatus === 'loading'}
+                                            className="w-full bg-white/10 border border-white/10 text-white font-semibold py-3.5 rounded-xl hover:bg-white/15 active:scale-[0.98] transition-all text-[15px] disabled:opacity-50"
+                                        >
+                                            {emailStatus === 'loading' ? 'Cadastrando...' : 'Criar Conta Gratuita'}
+                                        </button>
+                                        {emailStatus === 'error' && (
+                                            <p className="text-red-400 text-[13px] text-center">Erro ao cadastrar. Tente novamente.</p>
+                                        )}
+                                    </form>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </section>
 
@@ -351,7 +445,7 @@ export default function SalesPage() {
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] bg-brand-purple/20 blur-[80px]" />
 
                     <p className="text-[24px] font-outfit font-medium text-white/90 mb-10 italic max-w-[400px] leading-tight relative z-10 drop-shadow-md">
-                        "Não somos uma planilha crua. Somos o sistema estrutural que mantém vocês conectados."
+                        &quot;Não somos uma planilha crua. Somos o sistema estrutural que mantém vocês conectados.&quot;
                     </p>
 
                     <button
@@ -369,6 +463,32 @@ export default function SalesPage() {
                 </section>
 
             </div>
+
+            {/* RODAPÉ LEGAL */}
+            <footer className="relative z-10 w-full max-w-[480px] mx-auto px-5 pb-12 pt-8 border-t border-white/5 mt-4">
+                <div className="flex flex-col items-center gap-4">
+                    <p className="text-[12px] text-white/30 font-medium tracking-wide text-center">
+                        © {new Date().getFullYear()} Bingo2Gether — Todos os direitos reservados.
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-x-5 gap-y-2">
+                        <a href="https://bingo2gether-app.vercel.app/termos-e-privacidade" target="_blank" rel="noopener noreferrer" className="text-[12px] text-white/30 hover:text-white/70 transition-colors underline-offset-2">
+                            Termos &amp; Privacidade
+                        </a>
+                        <a href="https://bingo2gether-app.vercel.app/politica-reembolso" target="_blank" rel="noopener noreferrer" className="text-[12px] text-white/30 hover:text-white/70 transition-colors">
+                            Política de Reembolso
+                        </a>
+                        <a href="https://bingo2gether-app.vercel.app/contato" target="_blank" rel="noopener noreferrer" className="text-[12px] text-white/30 hover:text-white/70 transition-colors">
+                            Suporte
+                        </a>
+                        <a href="https://www.facebook.com/bingo2gether" target="_blank" rel="noopener noreferrer" className="text-[12px] text-white/30 hover:text-white/70 transition-colors">
+                            Facebook
+                        </a>
+                    </div>
+                    <p className="text-[11px] text-white/20 text-center max-w-[320px] leading-relaxed">
+                        Ao assinar, você concorda com nossos Termos de Uso e confirma ter lido nossa Política de Privacidade. Pagamento processado com segurança pela Stripe.
+                    </p>
+                </div>
+            </footer>
         </main>
     );
 }

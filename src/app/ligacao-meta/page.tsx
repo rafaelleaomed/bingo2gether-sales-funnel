@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { MicOff, Grid3X3, Volume2, Plus, Video, Users, Phone, Target, Home, Plane, Car, Gem, Battery, Wifi, Signal } from 'lucide-react';
 
@@ -20,7 +20,7 @@ function LigacaoContent() {
 
     // Choose icon based on meta name mapping
     const lowerMeta = metaName.toLowerCase();
-    let CallerIcon: any = Target;
+    let CallerIcon: React.ElementType = Target;
     if (lowerMeta.includes('casa') || lowerMeta.includes('reforma') || lowerMeta.includes('constru')) CallerIcon = Home;
     else if (lowerMeta.includes('viag') || lowerMeta.includes('euro') || lowerMeta.includes('disney')) CallerIcon = Plane;
     else if (lowerMeta.includes('casament') || lowerMeta.includes('festa') || lowerMeta.includes('noiv')) CallerIcon = RingsIcon;
@@ -30,6 +30,8 @@ function LigacaoContent() {
     const [callDuration, setCallDuration] = useState(0);
     const [isTransitioning, setIsTransitioning] = useState(false);
     const [currentTime, setCurrentTime] = useState('09:41');
+    const [audioBlocked, setAudioBlocked] = useState(false);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
 
     useEffect(() => {
         // Set dynamic local time for the status bar
@@ -43,6 +45,13 @@ function LigacaoContent() {
         const timer = setInterval(() => {
             setCallDuration((prev) => prev + 1);
         }, 1000);
+
+        if (audioRef.current) {
+            audioRef.current.play().catch(err => {
+                console.log("Autoplay blocked:", err);
+                setAudioBlocked(true);
+            });
+        }
 
         return () => {
             clearInterval(timeInterval);
@@ -63,7 +72,7 @@ function LigacaoContent() {
         }, 500);
     };
 
-    const ActionButton = ({ icon: Icon, label }: { icon: any, label: string }) => (
+    const ActionButton = ({ icon: Icon, label }: { icon: React.ElementType, label: string }) => (
         <div className="flex flex-col items-center gap-2">
             <button className="w-[64px] h-[64px] rounded-full bg-[#48484A] flex items-center justify-center transition-all duration-200 active:scale-95 min-h-[44px] min-w-[44px] focus:ring-2 focus:ring-white">
                 <Icon size={28} color="#FFFFFF" strokeWidth={1.5} />
@@ -72,8 +81,26 @@ function LigacaoContent() {
         </div>
     );
 
+    const handlePlayAudio = () => {
+        if (audioRef.current && audioBlocked) {
+            const playPromise = audioRef.current.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    setAudioBlocked(false);
+                }).catch(err => console.log("Still blocked:", err));
+            }
+        }
+    };
+
     return (
-        <main className={`min-h-[100dvh] bg-black w-full overflow-x-hidden flex justify-center transition-opacity duration-500 font-ios select-none ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
+        <main onClick={handlePlayAudio} className={`min-h-[100dvh] bg-black w-full overflow-x-hidden flex justify-center transition-opacity duration-500 font-ios select-none ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
+            {audioBlocked && (
+                <div className="absolute top-16 left-0 w-full z-50 flex justify-center animate-bounce pointer-events-none">
+                    <div className="bg-white/20 backdrop-blur-md px-6 py-3 rounded-full text-white text-[15px] font-medium shadow-lg border border-white/10 flex items-center gap-2">
+                        <Volume2 size={18} /> Toque na tela para ativar o áudio
+                    </div>
+                </div>
+            )}
             <div className="w-full h-[100dvh] max-w-[100vw] lg:max-w-[400px] lg:mx-auto lg:rounded-[40px] lg:h-[90vh] lg:my-[5vh] lg:overflow-hidden relative bg-gradient-to-b from-[#1C1C1E] to-[#000000] flex flex-col animate-in fade-in duration-300">
 
                 {/* Status Bar (iOS Simulation) */}
@@ -132,6 +159,7 @@ function LigacaoContent() {
                                 </div>
                             </div>
                             <audio
+                                ref={audioRef}
                                 src="/ligacao1.mp3"
                                 autoPlay
                                 playsInline

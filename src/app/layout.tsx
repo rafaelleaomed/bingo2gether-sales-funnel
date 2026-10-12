@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Outfit, DM_Sans } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 import Tracking from "@/components/Tracking";
 
@@ -35,7 +36,9 @@ export default function RootLayout({
       <body
         className={`${outfit.variable} ${dmSans.variable} antialiased bg-black text-white`}
       >
-        <Tracking />
+        <Suspense fallback={null}>
+          <Tracking />
+        </Suspense>
         {children}
       </body>
     </html>

@@ -22,7 +22,7 @@ function IncomingAmorCallContent() {
         if (typeof window !== 'undefined' && 'vibrate' in navigator) {
             try {
                 navigator.vibrate([1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]);
-            } catch (e) {
+            } catch {
                 console.log("Vibration not supported/allowed");
             }
         }
@@ -36,14 +36,14 @@ function IncomingAmorCallContent() {
         return () => {
             clearInterval(timeInterval);
             if (typeof window !== 'undefined' && 'vibrate' in navigator) {
-                try { navigator.vibrate(0); } catch (e) { }
+                try { navigator.vibrate(0); } catch { }
             }
         };
     }, []);
 
     const handleAccept = () => {
         if (typeof window !== 'undefined' && 'vibrate' in navigator) {
-            try { navigator.vibrate(0); } catch (e) { }
+            try { navigator.vibrate(0); } catch { }
         }
         setIsTransitioning(true);
         setTimeout(() => {
